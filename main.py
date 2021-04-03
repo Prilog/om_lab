@@ -112,7 +112,7 @@ def gradient(func, grad, step_func, eps):
     result = Statistics()
 
     def func_from_grads(dot):
-        return lambda x: func(*[elem - x * grad[i](new) for i, elem in enumerate(dot)])
+        return lambda x: func(*[elem - x * grad[i](dot) for i, elem in enumerate(dot)])
 
     def gradient_step(elem):
         l = step_func(func_from_grads(elem), -1e3, 1e3, 1e-6)
@@ -120,13 +120,11 @@ def gradient(func, grad, step_func, eps):
         result.iterations += 1
         result.computations += l.computations
 
-    old = [0, 0, 1]
-    new = [0, 0, 0]
+    old = [0] * len(grad)
     new = gradient_step(old)
     result.traectory = [old[:], new[:]]
 
     while any(abs(cur - prev) > eps for cur, prev in zip(old, new)):
-        l = step_func(func_from_grads(new), -1e3, 1e3, 1e-6)
         old = new[:]
         new = gradient_step(old)
         result.traectory.append(new[:])
