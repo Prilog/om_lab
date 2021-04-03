@@ -1,5 +1,5 @@
 import math
-
+import numpy
 
 class Statistics:
     def __init__(self):
@@ -92,25 +92,44 @@ def fibonacci(f, l, r, eps):
     return result
 
 
+def linear(f, l, r, eps):
+    eps = 0.1
+    val = f(l)
+    res = l
+    i = l + eps
+    while i <= r:
+        if f(i) < val:
+            val = f(i)
+            res = i
+        i += eps
+    result = Statistics()
+    result.result = res
+    return result
+
+
 def gradient(func, grad, step_func, eps):
     result = Statistics()
-    old = 0
-    l = step_func(lambda x: func(old - x * grad(old)), -1e6, 1e6, 1e-6).result
-    new = old - l * grad(old)
-    result.traectory = [old, new]
+    old = [0, 0]
+    new = [0, 0]
+    l = step_func(lambda x: func(old[0] - x * grad[0](old), old[1] - x * grad[1](old)), -1e3, 1e3, 1e-6)
+    new[0] = old[0] - l.result * grad[0](old)
+    new[1] = old[1] - l.result * grad[1](old)
+    result.traectory = [old[:], new[:]]
     result.iterations += 1
-    result.computations += 2
-    while abs(old-new) > eps:
-        l = step_func(lambda x: func(new - x * grad(new)), -1e6, 1e6, 1e-6).result
-        old, new = new, new - l * grad(new)
-        result.traectory.append(new)
+    result.computations += l.computations
+    while abs(old[0] - new[0]) > eps or abs(old[1] - new[1]) > eps:
+        l = step_func(lambda x: func(new[0] - x * grad[0](new), new[1] - x * grad[1](new)), -1e3, 1e3, 1e-6)
+        old = new[:]
+        new[0] = old[0] - l.result * grad[0](old)
+        new[1] = old[1] - l.result * grad[1](old)
+        result.traectory.append(new[:])
         result.iterations += 1
-        result.computations += 1
+        result.computations += l.computations
     result.result = new
     return result
 
 
-print(gradient(func=lambda x: (x + 1) ** 2,
-               grad=lambda x: 2 * (x + 1),
+print(gradient(func=lambda x, y: (x - 5 + y)**2,
+               grad=[lambda p: 2 * (p[0] - 5 + p[1]), lambda p: 2 * (p[0] - 5 + p[1])],
                step_func=dichotomy,
                eps=1e-6).traectory)
