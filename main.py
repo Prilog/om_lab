@@ -7,6 +7,7 @@ class Statistics:
         self.computations = 0
         self.answer = None
         self.result = None
+        self.traectory = []
 
 
 def greater(a, b, eps):
@@ -23,7 +24,7 @@ def dichotomy(f, l, r, eps):
         mid = (l + r) / 2
         f1 = f(mid - eps)
         f2 = f(mid + eps)
-        if less(f1, f2, eps):
+        if f1 < f2:
             r = mid
         else:
             l = mid
@@ -42,7 +43,7 @@ def golden(f, l, r, eps):
     f2 = f(x2)
     result.computations += 2
     while r - l > eps:
-        if less(f1, f2, eps):
+        if f1 < f2:
             r = x2
             x2 = x1
             f2 = f1
@@ -73,7 +74,7 @@ def fibonacci(f, l, r, eps):
     result.computations += 2
     while n > 1:
         n -= 1
-        if greater(f1, f2, eps):
+        if f1 > f2:
             l = x1
             x1 = x2
             x2 = l + (r - l) * (fib[n - 1] / fib[n])
@@ -91,22 +92,25 @@ def fibonacci(f, l, r, eps):
     return result
 
 
-def gradient(func, grad, step, eps):
+def gradient(func, grad, step_func, eps):
     result = Statistics()
     old = 0
-    new = old - step * grad(old)
-    print(old)
-    print(new)
+    l = step_func(lambda x: func(old - x * grad(old)), -1e6, 1e6, 1e-6).result
+    new = old - l * grad(old)
+    result.traectory = [old, new]
     result.iterations += 1
     result.computations += 2
-    while abs(new - old) > eps:
-        old, new = new, new - step * grad(new)
-        print(old)
-        print(new)
+    while abs(old-new) > eps:
+        l = step_func(lambda x: func(new - x * grad(new)), -1e6, 1e6, 1e-6).result
+        old, new = new, new - l * grad(new)
+        result.traectory.append(new)
         result.iterations += 1
         result.computations += 1
     result.result = new
     return result
 
 
-print(gradient(lambda x: (x + 1) ** 2, lambda x: 2 * (x + 1), 0.1, 1e-6).result)
+print(gradient(func=lambda x: (x + 1) ** 2,
+               grad=lambda x: 2 * (x + 1),
+               step_func=dichotomy,
+               eps=1e-6).traectory)
