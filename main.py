@@ -2,6 +2,7 @@ import math
 
 # todo: add fixed number of iterations to all functions
 
+
 class Statistics:
     def __init__(self):
         self.iterations = 0
@@ -10,19 +11,21 @@ class Statistics:
         self.result = None
 
 
-def cmp_with_zero(value, eps, direction):
-    if direction:
-        return value < eps
-    return value > -eps
+def greater(a, b, eps):
+    return a - b > -eps
+
+
+def less(a, b, eps):
+    return a - b < eps
 
 
 def dichotomy(f, l, r, eps):
     result = Statistics()
-    while (r - l) > eps:
+    while r - l > eps:
         mid = (l + r) / 2
         f1 = f(mid - eps)
         f2 = f(mid + eps)
-        if f1 < f2:
+        if less(f1, f2, eps):
             r = mid
         else:
             l = mid
@@ -36,17 +39,27 @@ def dichotomy(f, l, r, eps):
 def golden(f, l, r, eps):
     fi = (1 + math.sqrt(5)) / 2
     result = Statistics()
+    x1 = r - (r - l) / (fi + 1)
+    x2 = l + (r - l) / (fi + 1)
+    f1 = f(x1)
+    f2 = f(x2)
     while r - l > eps:
-        x1 = r - (r - l) / fi
-        x2 = l + (r - l) / fi
-        f1 = f(x1)
-        f2 = f(x2)
-        if f1 - f2 > -eps:
-            l = x1
-        else:
+        print(l, r, f1, f2)
+        if less(f1, f2, eps):
             r = x2
-        result.computations += 2
+            x2 = x1
+            f2 = f1
+            x1 = l + (r - l) / (fi + 1)
+            f1 = f(x1)
+        else:
+            l = x1
+            x1 = x2
+            f1 = f2
+            x2 = r - (r - l) / (fi + 1)
+            f2 = f(x2)
+        result.computations += 1
         result.iterations += 1
+    print(l, r)
     result.result = (l + r) / 2
     return result
 
@@ -71,4 +84,4 @@ def fibonacci(f, l, r, eps):
     return result
 
 
-print(dichotomy(lambda x: (x + 1) ** 2, -100, 100, 0.000000001).result)
+print(golden(lambda x: (x + 1) ** 2, -100, 100, 0.000000001).result)
