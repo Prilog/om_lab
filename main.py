@@ -1,6 +1,7 @@
 import math
 import numpy
 
+
 class Statistics:
     def __init__(self):
         self.iterations = 0
@@ -109,27 +110,31 @@ def linear(f, l, r, eps):
 
 def gradient(func, grad, step_func, eps):
     result = Statistics()
-    old = [0, 0]
-    new = [0, 0]
-    l = step_func(lambda x: func(old[0] - x * grad[0](old), old[1] - x * grad[1](old)), -1e3, 1e3, 1e-6)
-    new[0] = old[0] - l.result * grad[0](old)
-    new[1] = old[1] - l.result * grad[1](old)
-    result.traectory = [old[:], new[:]]
-    result.iterations += 1
-    result.computations += l.computations
-    while abs(old[0] - new[0]) > eps or abs(old[1] - new[1]) > eps:
-        l = step_func(lambda x: func(new[0] - x * grad[0](new), new[1] - x * grad[1](new)), -1e3, 1e3, 1e-6)
-        old = new[:]
-        new[0] = old[0] - l.result * grad[0](old)
-        new[1] = old[1] - l.result * grad[1](old)
-        result.traectory.append(new[:])
+
+    def func_from_grads(dot):
+        return lambda x: func(*[elem - x * grad[i](new) for i, elem in enumerate(dot)])
+
+    def gradient_step(elem):
+        l = step_func(func_from_grads(elem), -1e3, 1e3, 1e-6)
+        return [elem[i] - l.result * grad[i](elem) for i in range(len(elem))]
         result.iterations += 1
         result.computations += l.computations
+
+    old = [0, 0, 1]
+    new = [0, 0, 0]
+    new = gradient_step(old)
+    result.traectory = [old[:], new[:]]
+
+    while any(abs(cur - prev) > eps for cur, prev in zip(old, new)):
+        l = step_func(func_from_grads(new), -1e3, 1e3, 1e-6)
+        old = new[:]
+        new = gradient_step(old)
+        result.traectory.append(new[:])
     result.result = new
     return result
 
 
-print(gradient(func=lambda x, y: (x - 5 + y)**2,
-               grad=[lambda p: 2 * (p[0] - 5 + p[1]), lambda p: 2 * (p[0] - 5 + p[1])],
-               step_func=dichotomy,
+print(gradient(func=lambda x, y, z: (x - 5 + y) ** 2 + (z + 3) ** 2,
+               grad=[lambda p: 2 * (p[0] - 5 + p[1]), lambda p: 2 * (p[0] - 5 + p[1]), lambda p: 2 * (p[2] + 3)],
+               step_func=linear,
                eps=1e-6).traectory)
