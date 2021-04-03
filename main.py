@@ -116,9 +116,10 @@ def gradient(func, grad, step_func, eps):
 
     def gradient_step(elem):
         l = step_func(func_from_grads(elem), -1e3, 1e3, 1e-6)
-        return [elem[i] - l.result * grad[i](elem) for i in range(len(elem))]
         result.iterations += 1
         result.computations += l.computations
+        return [elem[i] - l.result * grad[i](elem) for i in range(len(elem))]
+
 
     old = [0] * len(grad)
     new = gradient_step(old)
