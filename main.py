@@ -1,7 +1,5 @@
 import math
 
-# todo: add fixed number of iterations to all functions
-
 
 class Statistics:
     def __init__(self):
@@ -35,50 +33,59 @@ def dichotomy(f, l, r, eps):
     return result
 
 
-# todo: can be optimised, by reducing number of computations to 1
 def golden(f, l, r, eps):
     fi = (1 + math.sqrt(5)) / 2
     result = Statistics()
-    x1 = r - (r - l) / (fi + 1)
-    x2 = l + (r - l) / (fi + 1)
+    x1 = r - (r - l) / fi
+    x2 = l + (r - l) / fi
     f1 = f(x1)
     f2 = f(x2)
+    result.computations += 2
     while r - l > eps:
-        print(l, r, f1, f2)
         if less(f1, f2, eps):
             r = x2
             x2 = x1
             f2 = f1
-            x1 = l + (r - l) / (fi + 1)
+            x1 = r - (r - l) / fi
             f1 = f(x1)
         else:
             l = x1
             x1 = x2
             f1 = f2
-            x2 = r - (r - l) / (fi + 1)
+            x2 = l + (r - l) / fi
             f2 = f(x2)
         result.computations += 1
         result.iterations += 1
-    print(l, r)
     result.result = (l + r) / 2
     return result
 
 
-# todo: can be optimised like golden
 def fibonacci(f, l, r, eps):
-    fi = (1 + math.sqrt(5)) / 2
+    n = 100
+    fib = [0, 1, 1]
+    for i in range(n - 2):
+        fib.append(fib[-1] + fib[-2])
     result = Statistics()
-    while r - l > eps:
-        # todo: fix x1, x2, accoarding to fibonacci numbers. See: shorturl.at/djAHY
-        x1 = r - (r - l) / fi
-        x2 = l + (r - l) / fi
-        f1 = f(x1)
-        f2 = f(x2)
-        if f1 - f2 > -eps:
+    x1 = l + (r - l) * (fib[n - 2] / fib[n])
+    x2 = l + (r - l) * (fib[n - 1] / fib[n])
+    f1 = f(x1)
+    f2 = f(x2)
+    result.computations += 2
+    while n > 1:
+        n -= 1
+        if greater(f1, f2, eps):
             l = x1
+            x1 = x2
+            x2 = l + (r - l) * (fib[n - 1] / fib[n])
+            f1 = f2
+            f2 = f(x2)
         else:
             r = x2
-        result.computations += 2
+            x2 = x1
+            x1 = l + (r - l) * (fib[n - 2] / fib[n])
+            f2 = f1
+            f1 = f(x1)
+        result.computations += 1
         result.iterations += 1
     result.result = (l + r) / 2
     return result
