@@ -92,3 +92,20 @@ def fibonacci(f, l, r, eps):
 
 
 print(golden(lambda x: (x + 1) ** 2, -100, 100, 0.000000001).result)
+
+
+def gradient(func, grad, step, eps):
+    result = Statistics()
+    old = 0
+    new = old - step * grad(old)
+    print(old)
+    print(new)
+    result.iterations += 1
+    result.computations += 2
+    while abs(new - old) > eps:
+        print(old)
+        old, new = new, old - step * grad(old)
+        result.iterations += 1
+        result.computations += 1
+    result.result = new
+    return result
