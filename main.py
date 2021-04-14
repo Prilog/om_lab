@@ -114,6 +114,7 @@ class QuadraticFunction:
     F = x * A * xt + B * xt + c
     D = 1 * A * xt + x * A * 1t + b * 1t
     """
+
     def __init__(self, A, B, c):
         self.A = A
         self.B = B
@@ -125,7 +126,16 @@ class QuadraticFunction:
 
     def derivative(self, x):
         ones = np.array([np.ones(self.n)])
-        return (ones.dot(self.A).dot(x.transpose()) + x.dot(self.A).dot(ones.transpose()) + self.B.dot(ones.transpose()))[0][0]
+        return \
+            (ones.dot(self.A).dot(x.transpose()) + x.dot(self.A).dot(ones.transpose()) + self.B.dot(ones.transpose()))[
+                0][0]
+
+    def partial_derivative(self, x, idx):
+        ones = np.array([np.zeros(self.n)])
+        ones[0][idx] = 1
+        return \
+            (ones.dot(self.A).dot(x.transpose()) + x.dot(self.A).dot(ones.transpose()) + self.B.dot(ones.transpose()))[
+                0][0]
 
 
 def gradient(func, grad, step_func, eps):
@@ -139,7 +149,6 @@ def gradient(func, grad, step_func, eps):
         result.iterations += 1
         result.computations += l.computations
         return [elem[i] - l.result * grad[i](elem) for i in range(len(elem))]
-
 
     old = [0] * len(grad)
     new = gradient_step(old)
@@ -165,4 +174,4 @@ c = 0.0
 t = QuadraticFunction(A, B, c)
 x = np.array([[1.0, 1.0]])
 print(t.func(x))
-print(t.derivative(x))
+print(t.partial_derivative(x, 0))
