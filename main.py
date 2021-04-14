@@ -1,5 +1,5 @@
 import math
-import numpy
+import numpy as np
 
 
 class Statistics:
@@ -108,6 +108,26 @@ def linear(f, l, r, eps):
     return result
 
 
+class QuadraticFunction:
+    """
+    Format:
+    F = x * A * xt + B * xt + c
+    D = 1 * A * xt + x * A * 1t + b * 1t
+    """
+    def __init__(self, A, B, c):
+        self.A = A
+        self.B = B
+        self.c = c
+        self.n = A.shape[0]
+
+    def func(self, x):
+        return (x.dot(self.A).dot(x.transpose()) + self.B.dot(x.transpose()) + self.c)[0][0]
+
+    def derivative(self, x):
+        ones = np.array([np.ones(self.n)])
+        return (ones.dot(self.A).dot(x.transpose()) + x.dot(self.A).dot(ones.transpose()) + self.B.dot(ones.transpose()))[0][0]
+
+
 def gradient(func, grad, step_func, eps):
     result = Statistics()
 
@@ -133,7 +153,16 @@ def gradient(func, grad, step_func, eps):
     return result
 
 
-print(gradient(func=lambda x, y, z: (x - 5 + y) ** 2 + (z + 3) ** 2,
-               grad=[lambda p: 2 * (p[0] - 5 + p[1]), lambda p: 2 * (p[0] - 5 + p[1]), lambda p: 2 * (p[2] + 3)],
-               step_func=linear,
-               eps=1e-6).traectory)
+# print(gradient(func=lambda x, y, z: (x - 5 + y) ** 2 + (z + 3) ** 2,
+#                grad=[lambda p: 2 * (p[0] - 5 + p[1]), lambda p: 2 * (p[0] - 5 + p[1]), lambda p: 2 * (p[2] + 3)],
+#                step_func=linear,
+#                eps=1e-6).traectory)
+
+A = np.array([[2.0, 3.0], [4.0, 5.0]])
+B = np.array([[2.0, 2.0]])
+c = 0.0
+
+t = QuadraticFunction(A, B, c)
+x = np.array([[1.0, 1.0]])
+print(t.func(x))
+print(t.derivative(x))
