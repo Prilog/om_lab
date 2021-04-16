@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from datetime import datetime
 
 
 class Statistics:
@@ -126,16 +127,43 @@ class QuadraticFunction:
 
     def derivative(self, x):
         ones = np.array([np.ones(self.n)])
-        return \
-            (ones.dot(self.A).dot(x.transpose()) + x.dot(self.A).dot(ones.transpose()) + self.B.dot(ones.transpose()))[
-                0][0]
+        return (ones.dot(self.A).dot(x.transpose()) + x.dot(self.A).dot(ones.transpose()) + self.B.dot(ones.transpose()))[0][0]
 
     def partial_derivative(self, x, idx):
         ones = np.array([np.zeros(self.n)])
         ones[0][idx] = 1
-        return \
-            (ones.dot(self.A).dot(x.transpose()) + x.dot(self.A).dot(ones.transpose()) + self.B.dot(ones.transpose()))[
-                0][0]
+        return (ones.dot(self.A).dot(x.transpose()) + x.dot(self.A).dot(ones.transpose()) + self.B.dot(ones.transpose()))[0][0]
+
+    def __str__(self):
+        result = ""
+        for i in range(self.n):
+            for j in range(self.n):
+                if self.A[i][j] == 0:
+                    continue
+                result += str(self.A[i][j])
+                if i == j:
+                    result += "x[" + str(i) + "]^2 + "
+                else:
+                    result += "x[" + str(i) + "]x[" + str(j) + "] + "
+        for i in range(self.n):
+            if self.B[i] == 0:
+                continue
+            result += str(self.B[i]) + "x[" + str(i) + "] + "
+        result += str(self.c)
+        return result
+
+def build_random_QF(condition_number, size, seed=None):
+    if seed is None:
+        seed = condition_number * size + 10
+    np.random.seed(seed)
+    A = np.zeros(shape=(size, size), dtype=float)
+    diagonal = np.random.uniform(low=1, high=condition_number, size=size)
+    diagonal[0] = 1
+    diagonal[-1] = condition_number
+    np.fill_diagonal(A, diagonal)
+    B = np.random.uniform(low=1, high=condition_number, size=size)
+    c = np.random.uniform(low=1, high=condition_number, size=1)
+    return QuadraticFunction(A, B, c[0])
 
 
 def gradient(func, grad, step_func, eps):
@@ -175,3 +203,4 @@ t = QuadraticFunction(A, B, c)
 x = np.array([[1.0, 1.0]])
 print(t.func(x))
 print(t.partial_derivative(x, 0))
+print(build_random_QF(10, 5))
