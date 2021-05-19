@@ -221,4 +221,13 @@ def test_on_random_cn(cn_s, n, step_function):
     return results
 
 
+def test_on_random_n(cn, n_s, step_function):
+    results = []
+    for n in n_s:
+        func = build_random_QF(cn, n)
+        results.append(gradient(func, n, step_function, 1e-6))
+    return results
+
+
 print(list(map(lambda e: e.iterations, test_on_random_cn([1, 10, 100], 5, fibonacci))))
+print(list(map(lambda e: e.iterations, test_on_random_n(10, [2, 10, 20, 50], fibonacci))))
