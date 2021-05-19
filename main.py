@@ -10,18 +10,12 @@ class Statistics:
         self.answer = None
         self.result = None
         self.traectory = []
-
-
-def greater(a, b, eps):
-    return a - b > -eps
-
-
-def less(a, b, eps):
-    return a - b < eps
+        self.deltas = []
 
 
 def dichotomy(f, l, r, eps):
     result = Statistics()
+    delta = r - l
     while r - l > eps:
         mid = (l + r) / 2
         f1 = f(mid - eps)
@@ -30,6 +24,8 @@ def dichotomy(f, l, r, eps):
             r = mid
         else:
             l = mid
+        result.deltas.append((r - l) - delta)
+        delta = r - l
         result.computations += 2
         result.iterations += 1
     result.result = l
@@ -44,6 +40,7 @@ def golden(f, l, r, eps):
     f1 = f(x1)
     f2 = f(x2)
     result.computations += 2
+    delta = r - l
     while r - l > eps:
         if f1 < f2:
             r = x2
@@ -57,6 +54,8 @@ def golden(f, l, r, eps):
             f1 = f2
             x2 = l + (r - l) / fi
             f2 = f(x2)
+        result.deltas.append((r - l) - delta)
+        delta = r - l
         result.computations += 1
         result.iterations += 1
     result.result = (l + r) / 2
@@ -73,6 +72,7 @@ def fibonacci(f, l, r, eps):
     x2 = l + (r - l) * (fib[n - 1] / fib[n])
     f1 = f(x1)
     f2 = f(x2)
+    delta = r - l
     result.computations += 2
     while n > 1:
         n -= 1
@@ -88,6 +88,8 @@ def fibonacci(f, l, r, eps):
             x1 = l + (r - l) * (fib[n - 2] / fib[n])
             f2 = f1
             f1 = f(x1)
+        result.deltas.append((r - l) - delta)
+        delta = r - l
         result.computations += 1
         result.iterations += 1
     result.result = (l + r) / 2
@@ -197,26 +199,26 @@ def gradient(func, n, step_func, eps):
 #                step_func=linear,
 #                eps=1e-6).traectory)
 
-A = np.array([[2.0, 3.0], [4.0, 5.0]])
-B = np.array([[2.0, 2.0]])
-c = 0.0
+# A = np.array([[2.0, 3.0], [4.0, 5.0]])
+# B = np.array([[2.0, 2.0]])
+# c = 0.0
+#
+# t = QuadraticFunction(A, B, c)
+# x = np.array([[1.0, 1.0]])
+# print(t.func(x))
+# xx = np.array([1.0, 1.0])
+# print(t.partial_derivative(xx, 1))
+# print(build_random_QF(10, 5))
+# stats = gradient(func=build_random_QF(100, 10), n=10, step_func=fibonacci, eps=1e-6)
+# print(stats.result, stats.iterations, stats.computations, stats.answer, stats.traectory)
 
-t = QuadraticFunction(A, B, c)
-x = np.array([[1.0, 1.0]])
-print(t.func(x))
-xx = np.array([1.0, 1.0])
-print(t.partial_derivative(xx, 1))
-print(build_random_QF(10, 5))
-stats = gradient(func=build_random_QF(100, 5), n=5, step_func=fibonacci, eps=1e-6)
-print(stats.result, stats.iterations, stats.computations, stats.answer, stats.traectory)
 
-
-def test_on_random_cn(cn_s, n):
+def test_on_random_cn(cn_s, n, step_function):
     results = []
     for cn in cn_s:
         func = build_random_QF(cn, n)
-        results.append(gradient(func, n, linear, 1e-6))
-    return list(map(lambda e: e.iterations, results))
+        results.append(gradient(func, n, step_function, 1e-6))
+    return results
 
 
-#print(test_on_random_cn([1, 10, 100], 5))
+print(list(map(lambda e: e.iterations, test_on_random_cn([1, 10, 100], 5, fibonacci))))
