@@ -132,6 +132,8 @@ class QuadraticFunction:
     def partial_derivative(self, x, idx):
         ones = np.array([np.zeros(self.n)])
         ones[0][idx] = 1
+        import pdb
+        pdb.set_trace()
         return (ones.dot(self.A).dot(x.transpose()) + x.dot(self.A).dot(ones.transpose()) + self.B.dot(ones.transpose()))[0][0]
 
     def __str__(self):
@@ -152,6 +154,7 @@ class QuadraticFunction:
         result += str(self.c)
         return result
 
+
 def build_random_QF(condition_number, size, seed=None):
     if seed is None:
         seed = condition_number * size + 10
@@ -166,19 +169,19 @@ def build_random_QF(condition_number, size, seed=None):
     return QuadraticFunction(A, B, c[0])
 
 
-def gradient(func, grad, step_func, eps):
+def gradient(func, n, step_func, eps):
     result = Statistics()
 
     def func_from_grads(dot):
-        return lambda x: func(*[elem - x * grad[i](dot) for i, elem in enumerate(dot)])
+        return lambda x: func(*[elem - x * func.partial_derivative(dot, i) for i, elem in enumerate(dot)])
 
     def gradient_step(elem):
         l = step_func(func_from_grads(elem), -1e3, 1e3, 1e-6)
         result.iterations += 1
         result.computations += l.computations
-        return [elem[i] - l.result * grad[i](elem) for i in range(len(elem))]
+        return [elem[i] - l.result * func.partial_derivative(elem, i) for i in range(len(elem))]
 
-    old = [0] * len(grad)
+    old = [0] * n
     new = gradient_step(old)
     result.traectory = [old[:], new[:]]
 
@@ -202,5 +205,16 @@ c = 0.0
 t = QuadraticFunction(A, B, c)
 x = np.array([[1.0, 1.0]])
 print(t.func(x))
-print(t.partial_derivative(x, 0))
+print(t.partial_derivative(x, 1))
 print(build_random_QF(10, 5))
+
+
+def test_on_random_cn(cn_s, n):
+    results = []
+    for cn in cn_s:
+        func = build_random_QF(cn, n)
+        results.append(gradient(func, n, linear, 1e-6))
+    return list(map(lambda e: e.iterations, results))
+
+
+print(test_on_random_cn([1, 10, 100], 5))
